@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>राम नाम जप काउंटर</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Tiro+Devanagari+Hindi&family=Hind:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #fff7ec;
+    --bg-glow: #ffe2b8;
+    --ink: #3a1a0c;
+    --ink-soft: #8a5a3c;
+    --saffron: #e8700f;
+    --saffron-deep: #b34a05;
+    --bead-off: #ecd5b8;
+    --btn-text: #fffaf2;
+    --panel: #ffffffb3;
+    --line: #f0d9bb;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #1c0f1f;
+      --bg-glow: #3b1a24;
+      --ink: #ffeacc;
+      --ink-soft: #c79a78;
+      --saffron: #ff9a3c;
+      --saffron-deep: #e0701a;
+      --bead-off: #3d2431;
+      --btn-text: #2a1006;
+      --panel: #2a1630b3;
+      --line: #4a2c3a;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #1c0f1f;
+    --bg-glow: #3b1a24;
+    --ink: #ffeacc;
+    --ink-soft: #c79a78;
+    --saffron: #ff9a3c;
+    --saffron-deep: #e0701a;
+    --bead-off: #3d2431;
+    --btn-text: #2a1006;
+    --panel: #2a1630b3;
+    --line: #4a2c3a;
+  }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); height: 100%; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0;
+    min-height: 100%;
+    background: var(--bg);
+    background-image: radial-gradient(ellipse at 50% 38%, var(--bg-glow) 0%, transparent 62%);
+    background-attachment: fixed;
+    color: var(--ink);
+    font-family: "Hind", "Noto Sans Devanagari", system-ui, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  main {
+    width: 100%;
+    max-width: 440px;
+    padding: 20px 20px 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+  }
+  h1 {
+    margin: 4px 0 0;
+    font-family: "Tiro Devanagari Hindi", "Noto Serif Devanagari", serif;
+    font-weight: 400;
+    font-size: 1.7rem;
+    letter-spacing: 0.01em;
+    text-align: center;
+  }
+  .lang {
+    display: flex;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 3px;
+    background: var(--panel);
+    align-self: flex-end;
+  }
+  .lang button {
+    font: inherit;
+    font-size: 0.9rem;
+    border: 0;
+    background: transparent;
+    color: var(--ink-soft);
+    padding: 6px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+  .lang button[aria-pressed="true"] { background: var(--saffron-deep); color: var(--btn-text); }
+  .lang button:focus-visible { outline: 2px solid var(--saffron); outline-offset: 2px; }
+  .sub { margin: -10px 0 0; color: var(--ink-soft); font-size: 0.95rem; text-align: center; }
+
+  .dial {
+    position: relative;
+    width: min(88vw, 380px);
+    aspect-ratio: 1;
+    flex: none;
+  }
+  .dial svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .bead { fill: var(--bead-off); transition: fill 0.15s; }
+  .bead.on { fill: var(--saffron); }
+  .bead.last { fill: var(--saffron-deep); }
+
+  #tap {
+    position: absolute;
+    inset: 15%;
+    border-radius: 50%;
+    border: 0;
+    cursor: pointer;
+    color: var(--btn-text);
+    background: radial-gradient(circle at 50% 30%, var(--saffron) 0%, var(--saffron-deep) 100%);
+    box-shadow: 0 10px 30px -8px var(--saffron-deep), inset 0 -6px 14px #0000002e, inset 0 4px 10px #ffffff40;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    touch-action: manipulation;
+    transition: transform 0.08s ease-out, box-shadow 0.08s ease-out;
+    font: inherit;
+  }
+  #tap:active, #tap.pressed {
+    transform: scale(0.955);
+    box-shadow: 0 4px 14px -6px var(--saffron-deep), inset 0 -3px 8px #0000002e, inset 0 4px 10px #ffffff40;
+  }
+  #tap:focus-visible { outline: 3px solid var(--ink); outline-offset: 5px; }
+  .ram {
+    font-family: "Tiro Devanagari Hindi", "Noto Serif Devanagari", serif;
+    font-size: clamp(3.6rem, 22vw, 5.6rem);
+    line-height: 1.05;
+  }
+  .round {
+    font-size: 1.05rem;
+    font-weight: 500;
+    opacity: 0.9;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .stats {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 4px 0;
+  }
+  .stat { padding: 12px 6px; text-align: center; }
+  .stat + .stat { border-left: 1px solid var(--line); }
+  .stat b {
+    display: block;
+    font-size: 1.7rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.2;
+  }
+  .stat span { color: var(--ink-soft); font-size: 0.9rem; }
+
+  .actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .actions button {
+    font: inherit;
+    font-size: 0.95rem;
+    padding: 9px 16px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--ink);
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+  .actions button:focus-visible { outline: 2px solid var(--saffron); outline-offset: 2px; }
+  .actions button.danger.armed { background: var(--saffron-deep); color: var(--btn-text); border-color: var(--saffron-deep); }
+
+  .toast {
+    min-height: 1.4em;
+    color: var(--saffron-deep);
+    font-weight: 500;
+    text-align: center;
+    font-size: 1.05rem;
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .toast { color: var(--saffron); } }
+  :root[data-theme="dark"] .toast { color: var(--saffron); }
+
+  .flash {
+    position: fixed;
+    z-index: 10;
+    pointer-events: none;
+    font-family: "Tiro Devanagari Hindi", "Noto Serif Devanagari", serif;
+    font-size: 2.1rem;
+    line-height: 1;
+    color: var(--saffron-deep);
+    text-shadow: 0 2px 10px var(--bg-glow);
+    white-space: nowrap;
+    animation: flashUp 1s ease-out forwards;
+  }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .flash { color: var(--saffron); } }
+  :root[data-theme="dark"] .flash { color: var(--saffron); }
+  @keyframes flashUp {
+    0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.6); }
+    15%  { opacity: 1; transform: translate(-50%, -70%) scale(1.15); }
+    100% { opacity: 0; transform: translate(calc(-50% + var(--dx, 0px)), -260%) scale(1); }
+  }
+  @keyframes flashFade {
+    0%   { opacity: 0; }
+    20%  { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    #tap, .bead { transition: none; }
+    .flash { animation: flashFade 0.7s ease-out forwards; transform: translate(-50%, -50%); }
+  }
+</style>
+</head>
+<body>
+<main>
+  <div class="lang" role="group" aria-label="Language / भाषा">
+    <button type="button" id="langHi" data-lang="hi">हिन्दी</button>
+    <button type="button" id="langEn" data-lang="en">English</button>
+  </div>
+
+  <h1 id="title">राम नाम जप</h1>
+  <p class="sub" id="sub"></p>
+
+  <div class="dial">
+    <svg id="beads" viewBox="0 0 360 360" aria-hidden="true"></svg>
+    <button id="tap" type="button">
+      <span class="ram" id="ramWord">राम</span>
+      <span class="round" id="roundLabel">0 / 108</span>
+    </button>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <section class="stats" id="statsBox">
+    <div class="stat"><b id="today">0</b><span id="lblToday"></span></div>
+    <div class="stat"><b id="malas">0</b><span id="lblMalas"></span></div>
+    <div class="stat"><b id="total">0</b><span id="lblTotal"></span></div>
+  </section>
+
+  <div class="actions">
+    <button type="button" id="undo"></button>
+    <button type="button" id="reset" class="danger"></button>
+  </div>
+</main>
+
+<script>
+(function () {
+  var KEY = "ramNaamJap:v1";
+  var BEADS = 108;
+
+  var LANG_KEY = "ramNaamJap:lang";
+  var STR = {
+    hi: {
+      title: "राम नाम जप",
+      sub: "हर बार बीच के बटन को दबाएँ और राम नाम बोलें",
+      word: "राम",
+      aria: "राम नाम जप गिनें",
+      today: "आज",
+      malas: "माला पूरी",
+      total: "कुल जप",
+      undo: "एक घटाएँ",
+      reset: "सब शून्य करें",
+      resetSure: "पक्का? दोबारा दबाएँ",
+      malaDone: "एक माला पूरी हुई — जय श्री राम 🙏",
+      cleared: "गिनती शून्य हो गई",
+      locale: "hi-IN",
+      pageTitle: "राम नाम जप काउंटर"
+    },
+    en: {
+      title: "Ram Naam Jap",
+      sub: "Tap the centre button each time you chant Ram's name",
+      word: "Ram",
+      aria: "Count one chant of Ram's name",
+      today: "Today",
+      malas: "Malas done",
+      total: "Total chants",
+      undo: "Undo one",
+      reset: "Reset all",
+      resetSure: "Sure? Tap again",
+      malaDone: "One mala complete — Jai Shri Ram 🙏",
+      cleared: "Count has been reset",
+      locale: "en-IN",
+      pageTitle: "Ram Naam Jap Counter"
+    }
+  };
+  var lang = "hi";
+  try {
+    var savedLang = localStorage.getItem(LANG_KEY);
+    if (savedLang === "hi" || savedLang === "en") lang = savedLang;
+  } catch (e) { /* ignore */ }
+  var T = function (k) { return STR[lang][k]; };
+
+  var state = { total: 0, todayDate: "", today: 0 };
+
+  function dateKey() {
+    var d = new Date();
+    return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
+  }
+
+  function load() {
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (raw) {
+        var s = JSON.parse(raw);
+        if (s && typeof s.total === "number") state = s;
+      }
+    } catch (e) { /* storage unavailable: start from zero */ }
+    if (state.todayDate !== dateKey()) { state.todayDate = dateKey(); state.today = 0; }
+  }
+
+  function save() {
+    try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* ignore */ }
+  }
+
+  // Build the 108-bead ring
+  var svg = document.getElementById("beads");
+  var NS = "http://www.w3.org/2000/svg";
+  var beadEls = [];
+  var cx = 180, cy = 180, R = 166;
+  for (var i = 0; i < BEADS; i++) {
+    var a = (i / BEADS) * Math.PI * 2 - Math.PI / 2;
+    var c = document.createElementNS(NS, "circle");
+    c.setAttribute("cx", (cx + R * Math.cos(a)).toFixed(2));
+    c.setAttribute("cy", (cy + R * Math.sin(a)).toFixed(2));
+    c.setAttribute("r", "4.2");
+    c.setAttribute("class", "bead");
+    svg.appendChild(c);
+    beadEls.push(c);
+  }
+
+  var $ = function (id) { return document.getElementById(id); };
+  var fmt = function (n) { return n.toLocaleString(T("locale")); };
+
+  function applyLang() {
+    document.documentElement.lang = lang;
+    document.title = T("pageTitle");
+    $("title").textContent = T("title");
+    $("sub").textContent = T("sub");
+    $("ramWord").textContent = T("word");
+    $("tap").setAttribute("aria-label", T("aria"));
+    $("lblToday").textContent = T("today");
+    $("lblMalas").textContent = T("malas");
+    $("lblTotal").textContent = T("total");
+    $("undo").textContent = T("undo");
+    if (!$("reset").classList.contains("armed")) $("reset").textContent = T("reset");
+    else $("reset").textContent = T("resetSure");
+    $("langHi").setAttribute("aria-pressed", lang === "hi" ? "true" : "false");
+    $("langEn").setAttribute("aria-pressed", lang === "en" ? "true" : "false");
+    render();
+  }
+
+  function setLang(l) {
+    lang = l;
+    try { localStorage.setItem(LANG_KEY, l); } catch (e) { /* ignore */ }
+    $("toast").textContent = "";
+    applyLang();
+  }
+  $("langHi").addEventListener("click", function () { setLang("hi"); });
+  $("langEn").addEventListener("click", function () { setLang("en"); });
+
+  function render() {
+    var inRound = state.total % BEADS;
+    for (var i = 0; i < BEADS; i++) {
+      beadEls[i].setAttribute("class", "bead" + (i < inRound ? " on" : "") + (i === inRound - 1 ? " last" : ""));
+    }
+    $("roundLabel").textContent = inRound + " / " + BEADS;
+    $("today").textContent = fmt(state.today);
+    $("malas").textContent = fmt(Math.floor(state.total / BEADS));
+    $("total").textContent = fmt(state.total);
+  }
+
+  var toastTimer;
+  function toast(msg) {
+    $("toast").textContent = msg;
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { $("toast").textContent = ""; }, 3500);
+  }
+
+  function buzz(p) { try { if (navigator.vibrate) navigator.vibrate(p); } catch (e) {} }
+
+  var tap = $("tap");
+
+  function flashRam(e) {
+    var x = e && e.clientX, y = e && e.clientY;
+    if (!x && !y) { // keyboard activation: use button centre
+      var r = tap.getBoundingClientRect();
+      x = r.left + r.width / 2;
+      y = r.top + r.height / 2;
+    }
+    var el = document.createElement("span");
+    el.className = "flash";
+    el.textContent = T("word");
+    el.setAttribute("aria-hidden", "true");
+    el.style.left = x + "px";
+    el.style.top = y + "px";
+    el.style.setProperty("--dx", Math.round((Math.random() - 0.5) * 90) + "px");
+    document.body.appendChild(el);
+    el.addEventListener("animationend", function () { el.remove(); });
+    setTimeout(function () { if (el.parentNode) el.remove(); }, 1500);
+  }
+
+  tap.addEventListener("click", function (e) {
+    flashRam(e);
+    if (state.todayDate !== dateKey()) { state.todayDate = dateKey(); state.today = 0; }
+    state.total += 1;
+    state.today += 1;
+    save();
+    render();
+    tap.classList.add("pressed");
+    setTimeout(function () { tap.classList.remove("pressed"); }, 70);
+
+    if (state.total % BEADS === 0) {
+      buzz([60, 60, 120]);
+      toast(T("malaDone"));
+    } else {
+      buzz(12);
+    }
+  });
+
+  $("undo").addEventListener("click", function () {
+    if (state.total > 0) {
+      state.total -= 1;
+      if (state.today > 0) state.today -= 1;
+      save();
+      render();
+    }
+  });
+
+  var resetBtn = $("reset"), resetTimer;
+  resetBtn.addEventListener("click", function () {
+    if (!resetBtn.classList.contains("armed")) {
+      resetBtn.classList.add("armed");
+      resetBtn.textContent = T("resetSure");
+      resetTimer = setTimeout(disarm, 4000);
+      return;
+    }
+    disarm();
+    state = { total: 0, todayDate: dateKey(), today: 0 };
+    save();
+    render();
+    toast(T("cleared"));
+  });
+  function disarm() {
+    clearTimeout(resetTimer);
+    resetBtn.classList.remove("armed");
+    resetBtn.textContent = T("reset");
+  }
+
+  load();
+  applyLang();
+})();
+</script>
+</body>
+</html>
